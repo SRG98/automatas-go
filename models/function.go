@@ -43,11 +43,8 @@ func (f *Function) hasOneInitialState() bool {
 			initialStates++
 		}
 	}
-	if initialStates == 1 {
-		return true
-	}
-	fmt.Println("El autómata debe tener exactamente un estado inicial.")
-	return false
+	// fmt.Println("Sólo un estado incial? ", initialStates == 1)
+	return initialStates == 1
 }
 
 func (f *Function) hasFinalStates() bool {
@@ -56,7 +53,7 @@ func (f *Function) hasFinalStates() bool {
 			return true
 		}
 	}
-	fmt.Println("El autómata debe tener al menos un estado final.")
+	// fmt.Println("El autómata debe tener al menos un estado final.")
 	return false
 }
 

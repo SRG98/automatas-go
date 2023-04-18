@@ -14,7 +14,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
-	"fyne.io/fyne/v2/storage" // Asegúrate de importar este paquete
+	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/SRG98/automatas-go/controllers"
@@ -23,7 +23,7 @@ import (
 type UI struct {
 	controller            *controllers.Controller
 	updateImageFunc       func()
-	inputStringsContainer *fyne.Container
+	inputStringsContainer *container.Scroll
 }
 
 func NewUI(controller *controllers.Controller) *UI {
@@ -38,15 +38,17 @@ type ButtonConfig struct {
 }
 
 func (ui *UI) RunUI() error {
+	// Crear aplicación Fyne
 	app := app.New()
 	app.Settings().SetTheme(theme.DefaultTheme())
 
+	// Crear ventana
 	win := app.NewWindow("Go-Automats")
 
 	// Crear botones
 	buttons := ui.createButtons(win, 6)
 
-	// Crear el contenedor de botones (vertical) con el botón de mostrar imagen
+	// Crear el contenedor de botones (vertical)
 	buttonObjects := make([]fyne.CanvasObject, len(buttons))
 	for i, button := range buttons {
 		buttonObjects[i] = button
@@ -410,14 +412,18 @@ func (u *UI) displayInputStrings(w fyne.Window) {
 	// Llamar a createStringCards para crear las tarjetas
 	stringCards := u.createStringCards(inputStrings)
 
+	// Envolver el contenedor de las cards en un objeto Scroll
+	scrollContainer := container.NewScroll(stringCards)
+	scrollContainer.SetMinSize(fyne.NewSize(500, 300)) // Establecer el tamaño mínimo para mostrar el scrollbar correctamente
+
 	// Agregar el contenedor a la UI
 	if u.inputStringsContainer == nil {
-		u.inputStringsContainer = stringCards
+		u.inputStringsContainer = scrollContainer
 		mainContainer := w.Content().(*fyne.Container)
-		mainContainer.Add(stringCards)
+		mainContainer.Add(scrollContainer)
 		mainContainer.Refresh()
 	} else {
-		u.inputStringsContainer.Objects = stringCards.Objects
+		u.inputStringsContainer.Content = scrollContainer.Content
 		u.inputStringsContainer.Refresh()
 	}
 }
@@ -426,7 +432,7 @@ func (u *UI) validateInputStrings() {
 	validations, error := u.controller.ProcessInputStrings()
 	fmt.Println("validations: ", validations)
 
-	if u.inputStringsContainer == nil || len(u.inputStringsContainer.Objects) == 0 {
+	if u.inputStringsContainer == nil || u.inputStringsContainer.Content == nil {
 		log.Println("No hay íconos para actualizar")
 		return
 	}
@@ -436,7 +442,9 @@ func (u *UI) validateInputStrings() {
 		return
 	}
 
-	for i, card := range u.inputStringsContainer.Objects {
+	stringCards := u.inputStringsContainer.Content.(*fyne.Container)
+
+	for i, card := range stringCards.Objects {
 		cardContainer := card.(*fyne.Container) // Obtener el contenedor de la tarjeta
 
 		border := cardContainer.Objects[0].(*canvas.Rectangle) // Obtener el objeto borde (rectangle)
@@ -462,42 +470,3 @@ func (u *UI) validateInputStrings() {
 		iconContainer.Refresh()
 	}
 }
-
-// func (u *UI) displayInputStrings(w fyne.Window) {
-// 	inputStrings := u.controller.GetInputStrings()
-
-// 	// Crear una lista de objetos Canvas para las cadenas y los círculos
-// 	items := make([]fyne.CanvasObject, 0, len(inputStrings)*2)
-
-// 	for _, str := range inputStrings {
-// 		// Crear un marco para la cadena
-// 		frame := widget.NewLabel(str)
-
-// 		// Crear un círculo gris
-// 		circle := canvas.NewCircle(color.Gray{})
-
-// 		circle.StrokeWidth = 2
-// 		circle.StrokeColor = color.Gray{}
-
-// 		// Agregar la cadena y el círculo a la lista de objetos
-// 		items = append(items, frame, circle)
-// 	}
-
-// 	// Crear un encabezado "Cadenas"
-// 	header := widget.NewLabel("Cadenas")
-// 	items = append([]fyne.CanvasObject{header}, items...)
-
-// 	// Crear un contenedor con los objetos
-// 	inputStringsContainer := container.NewVBox(items...)
-
-// 	// Agregar el contenedor a la UI
-// 	if u.inputStringsContainer == nil {
-// 		u.inputStringsContainer = inputStringsContainer
-// 		mainContainer := w.Content().(*fyne.Container)
-// 		mainContainer.Add(inputStringsContainer)
-// 		mainContainer.Refresh()
-// 	} else {
-// 		u.inputStringsContainer.Objects = inputStringsContainer.Objects
-// 		u.inputStringsContainer.Refresh()
-// 	}
-// }
