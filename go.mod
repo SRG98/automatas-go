@@ -4,8 +4,11 @@ go 1.20
 
 require golang.org/x/exp/shiny v0.0.0-20230321023759-10a507213a29
 
+require github.com/fyne-io/mobile v0.1.2 // indirect
+
 require (
 	dmitri.shuralyov.com/gpu/mtl v0.0.0-20221208032759-85de2813cf6b // indirect
+	fyne.io/fyne v1.4.3
 	fyne.io/systray v1.10.1-0.20230312215936-7f71b037e260 // indirect
 	github.com/OverCV/go-automats v0.0.0-20230415130518-426a690ff7d2 // indirect
 	github.com/awalterschulze/gographviz v2.0.3+incompatible // indirect

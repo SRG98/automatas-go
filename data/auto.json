@@ -1,42 +1,54 @@
 {
-  "Name": "Sample Automaton",
+  "Name": "ai",
   "States": [
     {
-      "Data": "q0",
-      "IsInitial": false,
-      "IsFinal": true,
-      "Adjacent": [
-        "q1"
-      ]
-    },
-    {
-      "Data": "q1",
+      "Data": "A",
       "IsInitial": true,
       "IsFinal": false,
       "Adjacent": [
-        "q0"
+        "A",
+        "B"
+      ]
+    },
+    {
+      "Data": "B",
+      "IsInitial": false,
+      "IsFinal": true,
+      "Adjacent": [
+        "B",
+        "A"
       ]
     }
   ],
   "Transitions": [
     {
-      "Start": "q1",
-      "End": "q0",
+      "Start": "A",
+      "End": "A",
       "Chars": [
-        "b"
+        "1"
       ]
     },
     {
-      "Start": "q0",
-      "End": "q1",
+      "Start": "A",
+      "End": "B",
       "Chars": [
-        "a",
-        "b"
+        "0"
+      ]
+    },
+    {
+      "Start": "B",
+      "End": "B",
+      "Chars": [
+        "0"
+      ]
+    },
+    {
+      "Start": "B",
+      "End": "A",
+      "Chars": [
+        "1"
       ]
     }
   ],
-  "Alphabet": [
-    "a",
-    "b"
-  ]
+  "Alphabet": []
 }
