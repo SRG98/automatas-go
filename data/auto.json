@@ -1,13 +1,13 @@
 {
-  "Name": "aii",
+  "Name": "i",
   "States": [
     {
       "Data": "A",
       "IsInitial": true,
       "IsFinal": false,
       "Adjacent": [
-        "A",
-        "B"
+        "B",
+        "A"
       ]
     },
     {
@@ -23,16 +23,16 @@
   "Transitions": [
     {
       "Start": "A",
-      "End": "A",
+      "End": "B",
       "Chars": [
-        "1 "
+        "0"
       ]
     },
     {
       "Start": "A",
-      "End": "B",
+      "End": "A",
       "Chars": [
-        "0"
+        "1"
       ]
     },
     {

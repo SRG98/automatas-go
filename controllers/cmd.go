@@ -10,9 +10,10 @@ import (
 )
 
 const (
-	inputJSONFile   = "data/auto.json"
-	inputTextFile   = "data/input.txt"
-	outputImagePath = "data/graph.png"
+	inputJSONFile    = "data/auto.json"
+	inputTextFile    = "data/input.txt"
+	AbsInputTextFile = "C:/Users/oh/3D Objects/Computación/Automatas/JavaScript/autovii/"
+	outputImagePath  = "data/graph.png"
 )
 
 type Controller struct {
@@ -31,6 +32,14 @@ func NewController() *Controller {
 
 func (c *Controller) GetAutomatsList() []*models.Automata {
 	return c.AutomatsList
+}
+
+func (c *Controller) SetInputStrings(strings []string) {
+	c.inputStrings = strings
+}
+
+func (c *Controller) GetInputStrings() []string {
+	return c.inputStrings
 }
 
 func (c *Controller) Run() error {
@@ -65,7 +74,7 @@ func (c *Controller) Run() error {
 		case 9:
 			err = c.viewStrings()
 		case 10:
-			err = c.processInputStrings()
+			// err = c.processInputStrings()
 		case 0:
 			return nil
 		default:
@@ -128,6 +137,8 @@ func (c *Controller) CreateAutomata(name string) bool {
 }
 
 func (c *Controller) SelectAutomata(index int) bool {
+	fmt.Println("POS", index)
+
 	if len(c.AutomatsList) == 0 {
 		fmt.Println("no hay autómatas disponibles")
 		return false
@@ -137,15 +148,17 @@ func (c *Controller) SelectAutomata(index int) bool {
 		fmt.Println("Negative Access")
 	}
 
-	if index >= len(c.AutomatsList)-1 {
+	if index >= len(c.AutomatsList) {
 		fmt.Println("índice de autómata inválido")
 		return false
 	}
 
 	c.selectedAutomata = c.AutomatsList[index]
 	if c.function == nil {
+		fmt.Println("No FN")
 		c.function = models.NewFunction(c.selectedAutomata)
 	} else {
+		fmt.Println("has fn")
 		c.function.SetAutomata(c.selectedAutomata)
 	}
 
@@ -283,31 +296,33 @@ func (c *Controller) viewStrings() error {
 	return nil
 }
 
-func (c *Controller) processInputStrings() error {
+func (c *Controller) ProcessInputStrings() ([]bool, error) {
+	// list := []bool{false, true, false, true, false}
+	// return list, nil
+
+	validations := []bool{}
+
 	if c.selectedAutomata == nil {
-		return fmt.Errorf("ningún autómata seleccionado")
+		return validations, fmt.Errorf("ningún autómata seleccionado")
 	}
 
 	if len(c.inputStrings) == 0 {
-		return fmt.Errorf("no hay cadenas de entrada para procesar")
+		return validations, fmt.Errorf("no hay cadenas de entrada para procesar")
 	}
 	fmt.Println("List: ", c.inputStrings)
+	// listRet []bool{}
 
 	for _, inputString := range c.inputStrings {
 		// Procesa y valida la cadena de entrada con el autómata seleccionado
 		// Puedes reemplazar esta parte con la lógica adecuada de validación de cadenas
 		// c.function.SetString(inputString)
 		inputString = strings.TrimSpace(inputString)
-		fmt.Println(inputString)
+		// fmt.Println(inputString)
 		isValid := c.function.Validate(inputString)
-		if isValid {
-			fmt.Println("La cadena", inputString, "es válida para este autómata.")
-		} else {
-			fmt.Println("La cadena", inputString, "no es válida para este autómata.")
-		}
-	}
 
-	return nil
+		validations = append(validations, isValid)
+	}
+	return validations, nil
 }
 
 func clearInputBuffer(reader *bufio.Reader) {

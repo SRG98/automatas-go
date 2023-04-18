@@ -2,24 +2,28 @@ package views
 
 import (
 	"fmt"
+	"image/color"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/storage" // Asegúrate de importar este paquete
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/SRG98/automatas-go/controllers"
 )
 
 type UI struct {
-	controller      *controllers.Controller
-	updateImageFunc func()
+	controller            *controllers.Controller
+	updateImageFunc       func()
+	inputStringsContainer *fyne.Container
 }
 
 func NewUI(controller *controllers.Controller) *UI {
@@ -39,7 +43,7 @@ func (ui *UI) RunUI() error {
 
 	win := app.NewWindow("Go-Automats")
 
-	// Crear 10 botones
+	// Crear botones
 	buttons := ui.createButtons(win, 8)
 
 	// Asignar una función al primer botón
@@ -103,7 +107,7 @@ func (ui *UI) createButtons(win fyne.Window, numButtons int) []*widget.Button {
 		case 4:
 			text = "Ingresar texto"
 			onTapped = func() {
-				ui.showCreateAutomataDialog(win)
+				ui.showFileChooserDialog(win)
 			}
 		case 5:
 			text = "Ver cadenas"
@@ -113,7 +117,7 @@ func (ui *UI) createButtons(win fyne.Window, numButtons int) []*widget.Button {
 		case 6:
 			text = "Procesar cadenas"
 			onTapped = func() {
-				ui.showCreateAutomataDialog(win)
+				ui.validateInputStrings()
 			}
 		default:
 			text = fmt.Sprintf("Botón %d", i+1)
@@ -342,3 +346,172 @@ func (u *UI) showTransitionConfigDialog(w fyne.Window) {
 
 	dialog.Show()
 }
+
+func (u *UI) showFileChooserDialog(win fyne.Window) {
+	fileDialog := dialog.NewFileOpen(
+		func(file fyne.URIReadCloser, err error) {
+			if err == nil && file != nil {
+				defer file.Close()
+
+				if filepath.Ext(file.URI().Path()) == ".txt" {
+					data, err := ioutil.ReadAll(file)
+					if err != nil {
+						log.Printf("No se pudo leer el archivo: %v\n", err)
+						return
+					}
+
+					lines := strings.Split(string(data), "\n")
+
+					// Guardar las cadenas en el controlador
+					u.controller.SetInputStrings(lines)
+
+					// Llamar a displayInputStrings para mostrar las cadenas
+					u.displayInputStrings(win)
+					// u.createStringCards(u.controller.GetInputStrings())
+
+				} else {
+					dialog.ShowInformation("Error", "Solo se permiten archivos .txt", win)
+				}
+			}
+		},
+		win,
+	)
+	predefinedPath := controllers.AbsInputTextFile
+	location, err := storage.ListerForURI(storage.NewFileURI(predefinedPath))
+	if err != nil {
+		log.Printf("No se pudo convertir la ruta en ListableURI: %v\n", err)
+		return
+	}
+
+	fileDialog.SetLocation(location)
+	fileDialog.SetFilter(storage.NewExtensionFileFilter([]string{".txt"}))
+	fileDialog.Show()
+}
+
+func (u *UI) createStringCards(inputStrings []string) *fyne.Container {
+	cards := make([]fyne.CanvasObject, len(inputStrings))
+
+	for i, inputString := range inputStrings {
+		// Crear un círculo blanco
+		circle := canvas.NewCircle(color.White)
+		circle.Resize(fyne.NewSize(30, 30))
+		circle.Refresh()
+		// Crear un contenedor Max para ajustar el tamaño mínimo del círculo
+		circleContainer := container.NewMax(circle)
+		circleContainer.Size().Min(fyne.NewSize(30, 30))
+
+		// Crear una etiqueta para la cadena
+		label := widget.NewLabel(inputString)
+
+		// Crear un contenedor horizontal que tenga la etiqueta y el círculo
+		cardContent := container.NewHBox(label, circleContainer)
+
+		// Crear un borde alrededor de la card
+		border := canvas.NewRectangle(color.Black)
+		border.SetMinSize(fyne.NewSize(
+			cardContent.MinSize().Width+50, cardContent.MinSize().Height+20,
+		))
+
+		// Crear un contenedor para la card que incluye el borde y el contenido
+		card := container.NewMax(border, cardContent)
+		cards[i] = card
+	}
+
+	// Crear un contenedor vertical que contenga todas las cards
+	stringCards := container.NewVBox(cards...)
+
+	return stringCards
+}
+
+func (u *UI) displayInputStrings(w fyne.Window) {
+	inputStrings := u.controller.GetInputStrings()
+
+	// Llamar a createStringCards para crear las tarjetas
+	stringCards := u.createStringCards(inputStrings)
+
+	// Agregar el contenedor a la UI
+	if u.inputStringsContainer == nil {
+		u.inputStringsContainer = stringCards
+		mainContainer := w.Content().(*fyne.Container)
+		mainContainer.Add(stringCards)
+		mainContainer.Refresh()
+	} else {
+		u.inputStringsContainer.Objects = stringCards.Objects
+		u.inputStringsContainer.Refresh()
+	}
+}
+
+func (u *UI) validateInputStrings() {
+	validations, error := u.controller.ProcessInputStrings()
+	fmt.Println("validations: ", validations)
+
+	if u.inputStringsContainer == nil || len(u.inputStringsContainer.Objects) == 0 {
+		log.Println("No hay círculos para actualizar")
+		return
+	}
+
+	if error != nil {
+		fmt.Println("Vals error?", error.Error())
+		return
+	}
+
+	for i, card := range u.inputStringsContainer.Objects {
+		cardContainer := card.(*fyne.Container)                 // Obtener el contenedor de la tarjeta
+		content := cardContainer.Objects[1].(*fyne.Container)   // Obtener el contenedor de contenido (etiqueta y círculo)
+		circleContainer := content.Objects[1].(*fyne.Container) // Obtener el contenedor del círculo
+		circleObj := circleContainer.Objects[0]                 // Obtener el objeto CanvasObject del círculo
+
+		// Verificar si el objeto CanvasObject es un círculo
+		circle, isCircle := circleObj.(*canvas.Circle)
+		if !isCircle {
+			log.Printf("El objeto no es un círculo: %T\n", circleObj)
+			continue
+		}
+
+		circle.FillColor = color.RGBA{R: 255, G: 0, B: 0, A: 255} // Rojo
+		if validations[i] {
+			circle.FillColor = color.RGBA{R: 0, G: 255, B: 0, A: 255} // Verde
+		}
+
+		circle.Refresh()
+	}
+}
+
+// func (u *UI) displayInputStrings(w fyne.Window) {
+// 	inputStrings := u.controller.GetInputStrings()
+
+// 	// Crear una lista de objetos Canvas para las cadenas y los círculos
+// 	items := make([]fyne.CanvasObject, 0, len(inputStrings)*2)
+
+// 	for _, str := range inputStrings {
+// 		// Crear un marco para la cadena
+// 		frame := widget.NewLabel(str)
+
+// 		// Crear un círculo gris
+// 		circle := canvas.NewCircle(color.Gray{})
+
+// 		circle.StrokeWidth = 2
+// 		circle.StrokeColor = color.Gray{}
+
+// 		// Agregar la cadena y el círculo a la lista de objetos
+// 		items = append(items, frame, circle)
+// 	}
+
+// 	// Crear un encabezado "Cadenas"
+// 	header := widget.NewLabel("Cadenas")
+// 	items = append([]fyne.CanvasObject{header}, items...)
+
+// 	// Crear un contenedor con los objetos
+// 	inputStringsContainer := container.NewVBox(items...)
+
+// 	// Agregar el contenedor a la UI
+// 	if u.inputStringsContainer == nil {
+// 		u.inputStringsContainer = inputStringsContainer
+// 		mainContainer := w.Content().(*fyne.Container)
+// 		mainContainer.Add(inputStringsContainer)
+// 		mainContainer.Refresh()
+// 	} else {
+// 		u.inputStringsContainer.Objects = inputStringsContainer.Objects
+// 		u.inputStringsContainer.Refresh()
+// 	}
+// }
