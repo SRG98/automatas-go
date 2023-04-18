@@ -92,45 +92,31 @@ func (a *Automata) ExistState(data string) bool {
 	return false
 }
 
-func (a *Automata) NewState(data string, final bool, initial bool) {
+func (a *Automata) NewState(data string, initial bool, final bool) bool {
 	newState := NewState(data)
-	newState.SetIsFinal(final)
 	newState.SetIsInitial(initial)
+	newState.SetIsFinal(final)
 
 	if a.ExistObj(newState, a.States) {
-		fmt.Println("State already exists.")
-		return
+		return false
 	}
 	a.States = append(a.States, newState)
-	fmt.Println("New state added.")
+	return true
 }
 
-func (a *Automata) NewTransition(start, end string, data []string) {
+func (a *Automata) NewTransition(start string, end string, data []string) bool {
 	newTransition := NewTransition(start, end, data)
 
 	if a.ExistObj(newTransition, a.Transitions) {
-		fmt.Println("Transition already exists.")
-		return
+		fmt.Print("la transición ya existe")
+		return false
 	}
 
-	if a.ExistState(start) && a.ExistState(end) {
-		validChars := true
-		for _, char := range data {
-			if !contains(a.Alphabet, char) {
-				validChars = false
-				break
-			}
-		}
-		if validChars {
-			state := a.GetState(start)
-			state.SetAdjacent(append(state.GetAdjacent(), end))
-			a.Transitions = append(a.Transitions, newTransition)
+	state := a.GetState(start)
+	state.SetAdjacent(append(state.GetAdjacent(), end))
+	a.Transitions = append(a.Transitions, newTransition)
 
-			fmt.Println("New transition added.")
-			return
-		}
-	}
-	fmt.Println("No transition added.")
+	return true
 }
 
 func (a *Automata) SeeStates() string {
@@ -156,11 +142,11 @@ func (a *Automata) ToString() string {
 	)
 }
 
-func contains(arr []string, str string) bool {
-	for _, a := range arr {
-		if a == str {
-			return true
-		}
-	}
-	return false
-}
+// func contains(arr []string, str string) bool {
+// 	for _, a := range arr {
+// 		if a == str {
+// 			return true
+// 		}
+// 	}
+// 	return false
+// }

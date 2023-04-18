@@ -1,73 +1,123 @@
 package models
 
+import (
+	"fmt"
+)
+
 type Function struct {
 	automata    *Automata
 	inputString string
-	index       int
 	actualState *State
 }
 
-// func NewFunction(automata *Automata) *Function {
-// 	return &Function{
-// 		automata:    automata,
-// 		inputString: "",
-// 		index:       0,
-// 		actualState: automata.GetInitialState(),
-// 	}
-// }
+func NewFunction(automata *Automata) *Function {
+	return &Function{
+		automata:    automata,
+		inputString: "",
+		actualState: nil,
+	}
+}
 
-// func (f *Function) SetString(inputString string) {
-// 	f.inputString = inputString
-// }
+func (f *Function) SetAutomata(automata *Automata) {
+	f.automata = automata
+}
 
-// func (f *Function) GetInitialState() *State {
-// 	for _, state := range f.automata.states {
-// 		if state.GetIsStart() {
-// 			return state
-// 		}
-// 	}
-// 	return nil
-// }
+func (f *Function) SetString(inputString string) {
+	f.inputString = inputString
+}
 
-// func (f *Function) Validate(inputString string) {
-// 	f.actualState = f.automata.states[0]
-// 	acceptable := false
-// 	for i := 0; i < len(inputString); i++ {
-// 		if f.actualState.GetIsEnd() {
-// 			acceptable = f.GetNextState()
-// 		}
-// 	}
-// }
+func (f *Function) GetInitialState() *State {
+	for _, state := range f.automata.GetStates() {
+		if state.GetIsInitial() {
+			// fmt.Println("intial: ", state.ToString())
+			return state
+		}
+	}
+	return nil
+}
 
-// func (f *Function) GetNextState() bool {
-// 	if f.index == len(f.inputString) {
-// 		fmt.Println("All string has been read.")
-// 		return true
-// 	}
-// 	flag := true
+func (f *Function) hasOneInitialState() bool {
+	initialStates := 0
+	for _, state := range f.automata.GetStates() {
+		if state.GetIsInitial() {
+			initialStates++
+		}
+	}
+	if initialStates == 1 {
+		return true
+	}
+	fmt.Println("El autómata debe tener exactamente un estado inicial.")
+	return false
+}
 
-// 	transitions := f.automata.GetTransitions()
-// 	for _, transition := range transitions {
-// 		if f.actualState.GetData() == transition.GetStart() && flag {
-// 			for _, char := range transition.GetChars() {
-// 				if char == string(f.inputString[f.index]) && flag {
-// 					if contains(f.automata.GetAlphabet(), string(f.inputString[f.index])) {
-// 						f.actualState = f.automata.GetState(transition.GetEnd())
-// 						fmt.Printf("Valid char, state to be: %s\n", f.actualState)
-// 						f.index++
-// 						flag = false
-// 					}
-// 				}
-// 			}
-// 		}
-// 	}
-// 	return false
-// }
+func (f *Function) hasFinalStates() bool {
+	for _, state := range f.automata.GetStates() {
+		if state.GetIsFinal() {
+			return true
+		}
+	}
+	fmt.Println("El autómata debe tener al menos un estado final.")
+	return false
+}
 
-// func (f *Function) SetActualState(actualState *State) {
-// 	f.actualState = actualState
-// }
+func (f *Function) canTransition(char string) bool {
+	transitions := f.automata.GetTransitions()
+	counter := 0
+	nextState := &State{}
 
-// func (f *Function) GetActualState() *State {
-// 	return f.actualState
-// }
+	for _, transition := range transitions {
+		// fmt.Println("actualState:", f.actualState.ToString(), "| trans:", transition.ToString())
+		if f.actualState.GetData() == transition.GetStart() {
+			for _, tChar := range transition.GetChars() {
+				// fmt.Println("to: ", char, "| iterate: ", tChar)
+				if tChar == char {
+					nextState = f.automata.GetState(transition.GetEnd())
+					counter++
+					// fmt.Println("++ | newActualState: ", nextState.ToString())
+				}
+			}
+		}
+	}
+
+	if counter == 1 {
+		f.actualState = nextState
+		return true
+	}
+
+	return false
+}
+
+func (f *Function) travel() bool {
+	if f.inputString == "" {
+		fmt.Println("La cadena de entrada está vacía.")
+		return f.actualState.GetIsFinal()
+	}
+
+	idx := 0
+	for idx < len(f.inputString) {
+		char := string(f.inputString[idx])
+		// fmt.Println("SENDED CHAR:", char)
+		if !f.canTransition(char) {
+			return false
+		}
+		idx++
+		// fmt.Printf("travel index: %v | Char %v can transition.\n", idx, char)
+	}
+	return true
+}
+
+func (f *Function) Validate(inputString string) bool {
+	if !f.hasOneInitialState() || !f.hasFinalStates() {
+		return false
+	}
+
+	// fmt.Println("string to use: ", inputString)
+	f.SetString(inputString)
+	f.actualState = f.GetInitialState()
+
+	if !f.travel() {
+		return false
+	}
+
+	return f.actualState.GetIsFinal()
+}

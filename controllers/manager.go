@@ -25,18 +25,18 @@ import (
 // 	return &automaton, nil
 // }
 
-func (c *Controller) writeJSONFile(filename string, automata *models.Automata) error {
+func (c *Controller) writeJSONFile(filename string, automata *models.Automata) bool {
 	fileBytes, err := json.MarshalIndent(automata, "", "  ")
 	if err != nil {
-		return err
+		return false
 	}
 
 	err = os.WriteFile(filename, fileBytes, 0644)
 	if err != nil {
-		return err
+		return false
 	}
 
-	return nil
+	return true
 }
 
 func (c *Controller) readInputFile(filepath string) error {

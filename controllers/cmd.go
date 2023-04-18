@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/SRG98/automatas-go/models"
-	"github.com/SRG98/automatas-go/views"
 )
 
 const (
@@ -18,19 +17,24 @@ const (
 
 type Controller struct {
 	selectedAutomata *models.Automata
-	automataList     []*models.Automata
+	AutomatsList     []*models.Automata
 	inputStrings     []string
 	function         *models.Function
 }
 
 func NewController() *Controller {
 	return &Controller{
-		automataList: make([]*models.Automata, 0),
+		AutomatsList: make([]*models.Automata, 0),
 		inputStrings: make([]string, 0),
 	}
 }
 
+func (c *Controller) GetAutomatsList() []*models.Automata {
+	return c.AutomatsList
+}
+
 func (c *Controller) Run() error {
+	// views.RunUI()
 	reader := bufio.NewReader(os.Stdin)
 	for {
 		c.showMenu()
@@ -43,19 +47,19 @@ func (c *Controller) Run() error {
 
 		switch option {
 		case 1:
-			err = c.createAutomata()
+			// err = c.CreateAutomata()
 		case 2:
-			err = c.selectAutomata()
+			// err = c.selectAutomata()
 		case 3:
-			err = c.createState()
+			// err = c.createState()
 		case 4:
-			err = c.createTransition()
+			// err = c.createTransition()
 		case 5:
 			err = c.readInputFile(inputTextFile)
 		case 6:
 			err = c.validateString()
 		case 7:
-			err = c.generateImage()
+			// err = c.generateImage()
 		case 8:
 			err = c.viewAutomata()
 		case 9:
@@ -96,152 +100,111 @@ func (c *Controller) readOption() (int, error) {
 	return option, err
 }
 
-func (c *Controller) createAutomata() error {
-	// Solicitar el nombre del autómata y crear un nuevo objeto Automata con ese nombre.
-	fmt.Print("Ingrese el nombre del autómata: ")
-	var name string
-	_, err := fmt.Scan(&name)
-	if err != nil {
-		return err
+func (c *Controller) CreateAutomata(name string) bool {
+	if name == "" {
+		fmt.Println("Nombre vacío")
+		return false
 	}
 
 	auto := models.NewAutomaton()
 	auto.SetName(name)
 
 	// Añadir el objeto Automata a la lista de autómatas (c.automataList) y seleccionarlo como el autómata actual (c.selectedAutomaton).
-	c.automataList = append(c.automataList, auto)
+	c.AutomatsList = append(c.AutomatsList, auto)
 	c.selectedAutomata = auto
 
-	fmt.Println("Autómata creado exitosamente.")
+	fmt.Println("Autómata creado y guardado exitosamente.")
 
-	c.function = models.NewFunction(c.selectedAutomata)
+	// FUNCIONALIDAD PELIGROSA
+	c.SelectAutomata(len(c.AutomatsList) - 1)
 
 	// Guardar el autómata en el archivo JSON
-	err = c.writeJSONFile(inputJSONFile, auto)
-	if err != nil {
-		return err
+	if c.writeJSONFile(inputJSONFile, auto) {
+		fmt.Println("Json guardado")
+		c.GenerateImage()
+		return true
 	}
-	return nil
+	return false
 }
 
-func (c *Controller) selectAutomata() error {
-	if len(c.automataList) == 0 {
-		return fmt.Errorf("no hay autómatas disponibles")
+func (c *Controller) SelectAutomata(index int) bool {
+	if len(c.AutomatsList) == 0 {
+		fmt.Println("no hay autómatas disponibles")
+		return false
 	}
 
-	fmt.Println("Seleccione el índice del autómata que desea seleccionar:")
-	for i, auto := range c.automataList {
-		fmt.Printf("%d. %s\n", i+1, auto.Name)
+	if index == -1 {
+		fmt.Println("Negative Access")
 	}
 
-	fmt.Print("Índice: ")
-
-	var index int
-	_, err := fmt.Scanf("%d", &index)
-	if err != nil {
-		return err
+	if index >= len(c.AutomatsList)-1 {
+		fmt.Println("índice de autómata inválido")
+		return false
 	}
 
-	if index < 1 || index > len(c.automataList) {
-		return fmt.Errorf("índice de autómata inválido")
+	c.selectedAutomata = c.AutomatsList[index]
+	if c.function == nil {
+		c.function = models.NewFunction(c.selectedAutomata)
+	} else {
+		c.function.SetAutomata(c.selectedAutomata)
 	}
 
-	c.selectedAutomata = c.automataList[index-1]
-	c.function = models.NewFunction(c.selectedAutomata)
 	fmt.Printf("Autómata '%s' seleccionado exitosamente.\n", c.selectedAutomata.Name)
-	return nil
+	c.GenerateImage()
+	return true
 }
 
-func (c *Controller) createState() error {
+func (c *Controller) CreateState(data string, isInitial bool, isFinal bool) bool {
 	if c.selectedAutomata == nil {
-		return fmt.Errorf("ningún autómata seleccionado")
+		fmt.Println("ningún autómata seleccionado")
+		return false
 	}
 
-	var data, isInitialStr, isFinalStr string
-	var isInitial, isFinal bool
-
-	fmt.Print("Ingrese el nombre del estado: ")
-	_, err := fmt.Scan(&data)
-	if err != nil {
-		return err
+	if data == "" {
+		return false
 	}
 
-	// Solicitar si el estado es inicial
-	fmt.Print("Es este estado inicial? (s/n): ")
-	_, err = fmt.Scan(&isInitialStr)
-	if err != nil {
-		return err
+	if c.selectedAutomata.NewState(data, isInitial, isFinal) {
+		fmt.Println("estado creado exitosamente.")
+		// RETURN FINAL
+		// Guardar el autómata en el archivo JSON
+		c.GenerateImage()
+		return c.writeJSONFile(inputJSONFile, c.selectedAutomata)
 	}
-	isInitial = (isInitialStr == "s")
-
-	// Solicitar si el estado es final
-	fmt.Print("Es este estado final? (s/n): ")
-	_, err = fmt.Scan(&isFinalStr)
-	if err != nil {
-		return err
-	}
-	isFinal = (isFinalStr == "s")
-
-	c.selectedAutomata.NewState(data, isInitial, isFinal)
-	fmt.Println("Estado creado exitosamente.")
-
-	// Guardar el autómata en el archivo JSON
-	err = c.writeJSONFile(inputJSONFile, c.selectedAutomata)
-	if err != nil {
-		return err
-	}
-	return nil
+	fmt.Println("estado ya existente.")
+	return false
 }
 
-func (c *Controller) createTransition() error {
+func (c *Controller) CreateTransition(start string, end string, charsStr string) bool {
+	if start == "" || end == "" || charsStr == "" {
+		fmt.Println("Blank form")
+		return false
+	}
+
 	if c.selectedAutomata == nil {
-		return fmt.Errorf("ningún autómata seleccionado")
+		fmt.Print("ningún autómata seleccionado")
+		return false
 	}
 
 	if len(c.selectedAutomata.States) == 0 {
-		return fmt.Errorf("el autómata no tiene estados")
+		fmt.Print("el autómata no tiene estados")
+		return false
 	}
 
-	var start, end, charsStr string
-
-	fmt.Print("Ingrese el estado de inicio: ")
-	_, err := fmt.Scan(&start)
-	if err != nil {
-		return err
+	if !c.selectedAutomata.ExistState(start) || !c.selectedAutomata.ExistState(end) {
+		fmt.Println("el estado final o de inicio no existe en el autómata")
+		return false
 	}
 
-	if !c.selectedAutomata.ExistState(start) {
-		return fmt.Errorf("el estado de inicio no existe en el autómata")
-	}
-
-	fmt.Print("Ingrese el estado final: ")
-	_, err = fmt.Scan(&end)
-	if err != nil {
-		return err
-	}
-
-	if !c.selectedAutomata.ExistState(end) {
-		return fmt.Errorf("el estado final no existe en el autómata")
-	}
-
-	fmt.Print("Ingrese los caracteres de la transición (separados por comas): ")
-	_, err = fmt.Scan(&charsStr)
-	if err != nil {
-		return err
-	}
 	chars := strings.Split(charsStr, ",")
 
-	err = c.selectedAutomata.NewTransition(start, end, chars)
-	if err != nil {
-		return err
+	if c.selectedAutomata.NewTransition(start, end, chars) {
+		fmt.Print("Nueva transición creada")
+		// Guardar el autómata en el archivo JSON
+		c.GenerateImage()
+		return c.writeJSONFile(inputJSONFile, c.selectedAutomata)
 	}
-
-	// Guardar el autómata en el archivo JSON
-	err = c.writeJSONFile(inputJSONFile, c.selectedAutomata)
-	if err != nil {
-		return err
-	}
-	return nil
+	return false
 }
 
 func (c *Controller) validateString() error {
@@ -267,14 +230,14 @@ func (c *Controller) validateString() error {
 	return nil
 }
 
-func (c *Controller) generateImage() error {
+func (c *Controller) GenerateImage() error {
 	if c.selectedAutomata == nil {
 		return fmt.Errorf("ningún autómata seleccionado")
 	}
 
 	outputPath := outputImagePath
 
-	err := views.GenerateImage(c.selectedAutomata, outputPath)
+	err := CreateImage(c.selectedAutomata, outputPath)
 	if err != nil {
 		return fmt.Errorf("error al generar la imagen: %v", err)
 	}

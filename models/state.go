@@ -26,7 +26,9 @@ func (s *State) SetData(data string) {
 func (s *State) GetData() string {
 	return s.Data
 }
-
+func (s *State) GetIsInitial() bool {
+	return s.IsInitial
+}
 func (s *State) SetIsInitial(initial bool) {
 	s.IsInitial = initial
 }
