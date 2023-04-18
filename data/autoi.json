@@ -2,8 +2,8 @@
     "name": "Automata 01",
     "alphabet": "01",
     "states": [
-      {"data": "X", "isStart": true, "isEnd": true, "adjacent":["Y", "X"]},
-      {"data": "Y", "isStart": false,"isEnd": false, "adjacent":[]}
+      {"data": "X", "isInitial": true, "isFinal": true, "adjacent":["Y", "X"]},
+      {"data": "Y", "isInitial": false,"isFinal": false, "adjacent":[]}
     ],
     "transitions": [
       {"start": "X", "end": "X", "chars": ["0"]},

@@ -5,68 +5,71 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/awalterschulze/gographviz"
+	"github.com/SRG98/automatas-go/models"
 )
 
-type State struct {
-	Data     string   `json:"data"`
-	IsStart  bool     `json:"isStart"`
-	IsEnd    bool     `json:"isEnd"`
-	Adjacent []string `json:"adjacent"`
-}
-
-type Transition struct {
-	Start string   `json:"start"`
-	End   string   `json:"end"`
-	Chars []string `json:"chars"`
-}
-
-type Automaton struct {
-	Name        string       `json:"name"`
-	Alphabet    string       `json:"alphabet"`
-	States      []State      `json:"states"`
-	Transitions []Transition `json:"transitions"`
-}
-
 func main() {
-	// Leer el archivo JSON
-	jsonData, err := os.ReadFile("./data/auto.json")
+	filename := "data/auto.json"
+
+	// Crea un nuevo autómata
+	auto := models.NewAutomaton()
+	auto.SetName("Sample Automaton")
+	auto.SetAlphabet([]string{"a", "b"})
+	// Agrega estados
+	auto.NewState("q0", false, true)
+	auto.NewState("q1", true, false)
+
+	// Agrega transiciones
+	auto.NewTransition("q0", "q1", []string{"a", "b"})
+	auto.NewTransition("q1", "q0", []string{"b"})
+
+	fmt.Println(auto.ToString())
+
+	// Writing
+	err := writeJSONFile(filename, auto)
 	if err != nil {
-		fmt.Println("Error al leer el archivo:", err)
+		fmt.Println("Error writing JSON file:", err)
 		os.Exit(1)
 	}
 
-	// Decodificar el JSON
-	var automaton Automaton
-	err = json.Unmarshal(jsonData, &automaton)
+	// Reading
+	automaton, err := readJSONFile(filename)
 	if err != nil {
-		fmt.Println("Error al decodificar el JSON:", err)
+		fmt.Println("Error reading JSON file:", err)
 		os.Exit(1)
 	}
 
-	// Crear un grafo con gographviz
-	graphAst, _ := gographviz.ParseString("digraph G {}")
-	graph := gographviz.NewGraph()
-	gographviz.Analyse(graphAst, graph)
+	fmt.Printf("automata: %+v\n", automaton)
 
-	// Añadir estados al grafo
-	for _, state := range automaton.States {
-		graph.AddNode("G", state.Data, nil)
+}
+
+func readJSONFile(filename string) (models.Automata, error) {
+	var automaton models.Automata
+
+	fileBytes, err := os.ReadFile(filename)
+	if err != nil {
+		return automaton, err
 	}
 
-	// Añadir transiciones al grafo
-	for _, transition := range automaton.Transitions {
-		for _, char := range transition.Chars {
-			attrs := make(map[string]string)
-			attrs["label"] = char
-			graph.AddEdge(transition.Start, transition.End, true, attrs)
-		}
+	err = json.Unmarshal(fileBytes, &automaton)
+	if err != nil {
+		return automaton, err
 	}
 
-	// Generar el código DOT del grafo
-	dotOutput := graph.String()
-	fmt.Println(dotOutput)
+	return automaton, nil
+}
 
-	// Para visualizar el grafo, copia y pega el código DOT en un
-	// visualizador en línea de Graphviz, como https://dreampuf.github.io/GraphvizOnline/
+func writeJSONFile(filename string, automata *models.Automata) error {
+	fileBytes, err := json.MarshalIndent(automata, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(filename, fileBytes, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
 }

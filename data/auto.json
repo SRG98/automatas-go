@@ -1,14 +1,42 @@
-
 {
-  "name": "Automata 01",
-  "alphabet": "01",
-  "states": [
-    {"data": "X", "isStart": true, "isEnd": true, "adjacent":["Y", "X"]},
-    {"data": "Y", "isStart": false,"isEnd": false, "adjacent":[]}
+  "Name": "Sample Automaton",
+  "States": [
+    {
+      "Data": "q0",
+      "IsInitial": true,
+      "IsFinal": false,
+      "Adjacent": [
+        "q1"
+      ]
+    },
+    {
+      "Data": "q1",
+      "IsInitial": false,
+      "IsFinal": true,
+      "Adjacent": [
+        "q0"
+      ]
+    }
   ],
-  "transitions": [
-    {"start": "X", "end": "X", "chars": ["0"]},
-    {"start": "Y", "end": "X", "chars": ["0"]},
-    {"start": "X", "end": "Y", "chars": ["1"]}
+  "Transitions": [
+    {
+      "Start": "q0",
+      "End": "q1",
+      "Chars": [
+        "a",
+        "b"
+      ]
+    },
+    {
+      "Start": "q1",
+      "End": "q0",
+      "Chars": [
+        "b"
+      ]
+    }
+  ],
+  "Alphabet": [
+    "a",
+    "b"
   ]
 }

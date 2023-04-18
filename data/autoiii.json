@@ -2,12 +2,12 @@
     "name": "Automata 03",
     "alphabet": "10",
     "states": [
-      {"data": "S1", "isStart": true, "isEnd": false, "adjacent":["S2", "S3"]},
-      {"data": "S2", "isStart": false, "isEnd": false, "adjacent":["S4", "S6"]},
-      {"data": "S3", "isStart": false, "isEnd": false, "adjacent":["S5", "S6"]},
-      {"data": "S4", "isStart": false, "isEnd": true, "adjacent":["S5", "S6"]},
-      {"data": "S5", "isStart": false, "isEnd": true, "adjacent":["S4", "S6"]},
-      {"data": "S6", "isStart": false, "isEnd": false, "adjacent":[]}
+      {"data": "S1", "isnItial": true, "isFinal": false, "adjacent":["S2", "S3"]},
+      {"data": "S2", "isnItial": false, "isFinal": false, "adjacent":["S4", "S6"]},
+      {"data": "S3", "isnItial": false, "isFinal": false, "adjacent":["S5", "S6"]},
+      {"data": "S4", "isnItial": false, "isFinal": true, "adjacent":["S5", "S6"]},
+      {"data": "S5", "isnItial": false, "isFinal": true, "adjacent":["S4", "S6"]},
+      {"data": "S6", "isnItial": false, "isFinal": false, "adjacent":[]}
     ],
     "transitions": [
       {"start": "S1", "end": "S2", "chars": ["0"]},
