@@ -347,7 +347,6 @@ func (u *UI) showFileChooserDialog(win fyne.Window) {
 						log.Printf("No se pudo leer el archivo: %v\n", err)
 						return
 					}
-
 					lines := strings.Split(string(data), "\n")
 
 					// Guardar las cadenas en el controlador

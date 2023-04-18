@@ -1,20 +1,20 @@
 {
-  "Name": "ai",
+  "Name": "aii",
   "States": [
     {
       "Data": "A",
-      "IsInitial": true,
-      "IsFinal": false,
-      "Adjacent": [
-        "B"
-      ]
-    },
-    {
-      "Data": "B",
       "IsInitial": false,
       "IsFinal": false,
       "Adjacent": [
         "C"
+      ]
+    },
+    {
+      "Data": "B",
+      "IsInitial": true,
+      "IsFinal": false,
+      "Adjacent": [
+        "A"
       ]
     },
     {
@@ -28,15 +28,15 @@
   ],
   "Transitions": [
     {
-      "Start": "A",
-      "End": "B",
+      "Start": "B",
+      "End": "A",
       "Chars": [
         "a",
         "c"
       ]
     },
     {
-      "Start": "B",
+      "Start": "A",
       "End": "C",
       "Chars": [
         "b"

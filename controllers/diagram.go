@@ -33,7 +33,7 @@ func CreateImage(automaton *models.Automata, outputPath string) error {
 	return nil
 }
 
-func automataToGraphviz(automaton *models.Automata) (*gographviz.Graph, error) {
+func automataToGraphviz(automata *models.Automata) (*gographviz.Graph, error) {
 	graphAst, err := gographviz.ParseString("digraph G {}")
 	if err != nil {
 		return nil, err
@@ -44,7 +44,7 @@ func automataToGraphviz(automaton *models.Automata) (*gographviz.Graph, error) {
 		return nil, err
 	}
 
-	for _, state := range automaton.States {
+	for _, state := range automata.States {
 		attrs := make(map[string]string)
 		attrs["label"] = state.Data
 		if state.IsInitial {
@@ -57,7 +57,7 @@ func automataToGraphviz(automaton *models.Automata) (*gographviz.Graph, error) {
 		graph.AddNode("G", state.Data, attrs)
 	}
 
-	for _, transition := range automaton.Transitions {
+	for _, transition := range automata.Transitions {
 		attrs := make(map[string]string)
 		attrs["label"] = "\"" + strings.Join(transition.Chars, ", ") + "\""
 		graph.AddEdge(transition.Start, transition.End, true, attrs)
