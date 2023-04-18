@@ -1,22 +1,28 @@
 {
-  "Name": "i",
+  "Name": "au",
   "States": [
     {
       "Data": "A",
       "IsInitial": true,
       "IsFinal": false,
       "Adjacent": [
-        "B",
-        "A"
+        "B"
       ]
     },
     {
       "Data": "B",
       "IsInitial": false,
+      "IsFinal": false,
+      "Adjacent": [
+        "C"
+      ]
+    },
+    {
+      "Data": "C",
+      "IsInitial": false,
       "IsFinal": true,
       "Adjacent": [
-        "B",
-        "A"
+        "C"
       ]
     }
   ],
@@ -25,28 +31,22 @@
       "Start": "A",
       "End": "B",
       "Chars": [
-        "0"
-      ]
-    },
-    {
-      "Start": "A",
-      "End": "A",
-      "Chars": [
-        "1"
+        "a",
+        "c"
       ]
     },
     {
       "Start": "B",
-      "End": "B",
+      "End": "C",
       "Chars": [
-        "0"
+        "b"
       ]
     },
     {
-      "Start": "B",
-      "End": "A",
+      "Start": "C",
+      "End": "C",
       "Chars": [
-        "1"
+        "a"
       ]
     }
   ],

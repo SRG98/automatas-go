@@ -1,0 +1,12 @@
+aaa
+aab
+abaa
+abc
+bbb
+bbc
+cba
+cca
+cbc
+cba
+
+(a|c)ba*

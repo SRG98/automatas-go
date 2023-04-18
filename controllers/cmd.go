@@ -12,7 +12,7 @@ import (
 const (
 	inputJSONFile    = "data/auto.json"
 	inputTextFile    = "data/input.txt"
-	AbsInputTextFile = "C:/Users/oh/3D Objects/Computación/Automatas/JavaScript/autovii/"
+	AbsInputTextFile = "D:/Código/automatas/goiii/data"
 	outputImagePath  = "data/graph.png"
 )
 
@@ -210,6 +210,9 @@ func (c *Controller) CreateTransition(start string, end string, charsStr string)
 	}
 
 	chars := strings.Split(charsStr, ",")
+	for i := range chars {
+		chars[i] = strings.TrimSpace(chars[i])
+	}
 
 	if c.selectedAutomata.NewTransition(start, end, chars) {
 		fmt.Print("Nueva transición creada")
@@ -310,12 +313,9 @@ func (c *Controller) ProcessInputStrings() ([]bool, error) {
 		return validations, fmt.Errorf("no hay cadenas de entrada para procesar")
 	}
 	fmt.Println("List: ", c.inputStrings)
-	// listRet []bool{}
 
 	for _, inputString := range c.inputStrings {
 		// Procesa y valida la cadena de entrada con el autómata seleccionado
-		// Puedes reemplazar esta parte con la lógica adecuada de validación de cadenas
-		// c.function.SetString(inputString)
 		inputString = strings.TrimSpace(inputString)
 		// fmt.Println(inputString)
 		isValid := c.function.Validate(inputString)

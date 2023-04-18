@@ -44,16 +44,7 @@ func (ui *UI) RunUI() error {
 	win := app.NewWindow("Go-Automats")
 
 	// Crear botones
-	buttons := ui.createButtons(win, 8)
-
-	// Asignar una función al primer botón
-	// buttons[0].OnTapped = func() {
-	// 	ui.showCreateAutomataDialog(win)
-	// }
-
-	// buttons[9].OnTapped = func() {
-	// 	ui.showCreateAutomataDialog(win)
-	// }
+	buttons := ui.createButtons(win, 6)
 
 	// Crear el contenedor de botones (vertical) con el botón de mostrar imagen
 	buttonObjects := make([]fyne.CanvasObject, len(buttons))
@@ -110,11 +101,6 @@ func (ui *UI) createButtons(win fyne.Window, numButtons int) []*widget.Button {
 				ui.showFileChooserDialog(win)
 			}
 		case 5:
-			text = "Ver cadenas"
-			onTapped = func() {
-				ui.showCreateAutomataDialog(win)
-			}
-		case 6:
 			text = "Procesar cadenas"
 			onTapped = func() {
 				ui.validateInputStrings()
