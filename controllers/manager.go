@@ -9,21 +9,21 @@ import (
 	"github.com/SRG98/automatas-go/models"
 )
 
-// func (c *Controller) readJSONFile(filename string) (*models.Automata, error) {
-// 	var automaton models.Automata
+func (c *Controller) readJSONFile(filename string) (*models.Automata, error) {
+	var automaton models.Automata
 
-// 	fileBytes, err := os.ReadFile(filename)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	fileBytes, err := os.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
 
-// 	err = json.Unmarshal(fileBytes, &automaton)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	err = json.Unmarshal(fileBytes, &automaton)
+	if err != nil {
+		return nil, err
+	}
 
-// 	return &automaton, nil
-// }
+	return &automaton, nil
+}
 
 func (c *Controller) writeJSONFile(filename string, automata *models.Automata) bool {
 	fileBytes, err := json.MarshalIndent(automata, "", "  ")

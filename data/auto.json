@@ -1,54 +1,19 @@
 {
-  "Name": "aii",
+  "Name": "SANTIAGO",
   "States": [
     {
       "Data": "A",
-      "IsInitial": false,
+      "IsInitial": true,
       "IsFinal": false,
-      "Adjacent": [
-        "C"
-      ]
+      "Adjacent": []
     },
     {
       "Data": "B",
-      "IsInitial": true,
-      "IsFinal": false,
-      "Adjacent": [
-        "A"
-      ]
-    },
-    {
-      "Data": "C",
       "IsInitial": false,
       "IsFinal": true,
-      "Adjacent": [
-        "C"
-      ]
+      "Adjacent": []
     }
   ],
-  "Transitions": [
-    {
-      "Start": "B",
-      "End": "A",
-      "Chars": [
-        "a",
-        "c"
-      ]
-    },
-    {
-      "Start": "A",
-      "End": "C",
-      "Chars": [
-        "b"
-      ]
-    },
-    {
-      "Start": "C",
-      "End": "C",
-      "Chars": [
-        "a"
-      ]
-    }
-  ],
+  "Transitions": [],
   "Alphabet": []
 }

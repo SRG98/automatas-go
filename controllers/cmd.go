@@ -43,9 +43,10 @@ func (c *Controller) GetInputStrings() []string {
 }
 
 func (c *Controller) Run() error {
-	// views.RunUI()
+	//views.RunUI()
 	reader := bufio.NewReader(os.Stdin)
 	for {
+
 		c.showMenu()
 		option, err := c.readOption()
 		clearInputBuffer(reader)
@@ -56,25 +57,49 @@ func (c *Controller) Run() error {
 
 		switch option {
 		case 1:
-			// err = c.CreateAutomata()
+			var name string
+			fmt.Println("Ingrese el nombre del automata")
+			fmt.Scanln(&name)
+			c.CreateAutomata(name)
 		case 2:
-			// err = c.selectAutomata()
+			var val int
+			fmt.Println("Ingrese el valor")
+			fmt.Scanln(&val)
+			c.SelectAutomata(val)
 		case 3:
-			// err = c.createState()
+			var name string
+			fmt.Println("Ingrese el estado")
+			fmt.Scanln(&name)
+			var ini bool
+			fmt.Println("Ingrese si es estado inicial")
+			fmt.Scanln(&ini)
+			var fin bool
+			fmt.Println("Ingrese si es estado final")
+			fmt.Scanln(&fin)
+			c.CreateState(name, ini, fin)
 		case 4:
-			// err = c.createTransition()
+			var sal string
+			fmt.Println("Ingrese el estado de salida")
+			fmt.Scanln(&sal)
+			var lle string
+			fmt.Println("Ingrese el estado de llegada")
+			fmt.Scanln(&lle)
+			var val string
+			fmt.Println("Ingrese la transicion")
+			fmt.Scanln(&val)
+			c.CreateTransition(sal, lle, val)
 		case 5:
-			err = c.readInputFile(inputTextFile)
+			c.readInputFile(inputTextFile)
 		case 6:
 			err = c.validateString()
 		case 7:
-			// err = c.generateImage()
+			c.GenerateImage()
 		case 8:
-			err = c.viewAutomata()
+			c.viewAutomata()
 		case 9:
-			err = c.viewStrings()
+			c.viewStrings()
 		case 10:
-			// err = c.processInputStrings()
+			c.ProcessInputStrings()
 		case 0:
 			return nil
 		default:
@@ -85,22 +110,26 @@ func (c *Controller) Run() error {
 		if err != nil {
 			fmt.Println("Error:", err)
 		}
-		_, _ = reader.ReadString('\n') // Agrega esta línea
-		// _, _ = fmt.Scanln() // Agrega esta línea
+		_, _ = reader.ReadString('\n')
+		_, _ = fmt.Scanln()
 	}
 }
 
 func (c *Controller) showMenu() {
-	fmt.Println("\n-------------------------------------------------")
-	fmt.Println("| 01. Crear autómata | 02. Seleccionar autómata |")
-	fmt.Println("| 03. Crear estado   | 04. Crear transición     |")
-	fmt.Println("| 05. Ingresar texto | 06. Validar cadena       |")
-	fmt.Println("| 07. Generar imagen | 08. Ver autómata         |")
-	fmt.Println("| 09. Ver cadenas    | 10. Procesar cadenas     |")
-	// fmt.Println("| 00.                | 00.                      |")
-	fmt.Println("| 00. Salir          |                          |")
-	fmt.Println("-------------------------------------------------")
-	fmt.Print("Seleccione una opción: ")
+	fmt.Println("\n-- PROYECTO AUTOMATAS 2023-1 --")
+	fmt.Println("Bienvenido al sistema")
+	fmt.Println("Seleccione la accion que desea realizar : ")
+	fmt.Println("| 1. Ingresar un autómata")
+	fmt.Println("| 2. Cargue un autómata")
+	fmt.Println("| 3. Ingresar un estado")
+	fmt.Println("| 4. Crear transicion")
+	fmt.Println("| 5. Ingresar un texto")
+	fmt.Println("| 6. Valide la cadena")
+	fmt.Println("| 7. Crear imagen del automata")
+	fmt.Println("| 8. Observar el automata")
+	fmt.Println("| 9. Ver las cadenas creadas")
+	fmt.Println("| 10. Procesar cadenas")
+	fmt.Println("| Salir")
 }
 
 func (c *Controller) readOption() (int, error) {
@@ -132,6 +161,7 @@ func (c *Controller) CreateAutomata(name string) bool {
 		fmt.Println("Json guardado")
 		c.GenerateImage()
 		return true
+
 	}
 	return false
 }
@@ -165,6 +195,7 @@ func (c *Controller) SelectAutomata(index int) bool {
 	fmt.Printf("Autómata '%s' seleccionado exitosamente.\n", c.selectedAutomata.Name)
 	c.GenerateImage()
 	return true
+
 }
 
 func (c *Controller) CreateState(data string, isInitial bool, isFinal bool) bool {
@@ -254,7 +285,7 @@ func (c *Controller) GenerateImage() error {
 	outputPath := outputImagePath
 
 	err := CreateImage(c.selectedAutomata, outputPath)
-	if err != nil {
+	if err == nil {
 		return fmt.Errorf("error al generar la imagen: %v", err)
 	}
 
@@ -300,8 +331,8 @@ func (c *Controller) viewStrings() error {
 }
 
 func (c *Controller) ProcessInputStrings() ([]bool, error) {
-	// list := []bool{false, true, false, true, false}
-	// return list, nil
+	list := []bool{false, true, false, true, false}
+	return list, nil
 
 	validations := []bool{}
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/SRG98/automatas-go/controllers"
+	//"github.com/SRG98/automatas-go/views"
 )
 
 func main() {
