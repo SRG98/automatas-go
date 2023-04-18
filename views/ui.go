@@ -392,19 +392,14 @@ func (u *UI) createStringCards(inputStrings []string) *fyne.Container {
 	cards := make([]fyne.CanvasObject, len(inputStrings))
 
 	for i, inputString := range inputStrings {
-		// Crear un círculo blanco
-		circle := canvas.NewCircle(color.White)
-		circle.Resize(fyne.NewSize(30, 30))
-		circle.Refresh()
-		// Crear un contenedor Max para ajustar el tamaño mínimo del círculo
-		circleContainer := container.NewMax(circle)
-		circleContainer.Size().Min(fyne.NewSize(30, 30))
-
 		// Crear una etiqueta para la cadena
 		label := widget.NewLabel(inputString)
 
-		// Crear un contenedor horizontal que tenga la etiqueta y el círculo
-		cardContent := container.NewHBox(label, circleContainer)
+		// Crear un contenedor vacío para el ícono
+		iconContainer := container.NewMax()
+
+		// Crear un contenedor horizontal que tenga la etiqueta y el contenedor de íconos
+		cardContent := container.NewHBox(label, iconContainer)
 
 		// Crear un borde alrededor de la card
 		border := canvas.NewRectangle(color.Black)
@@ -446,7 +441,7 @@ func (u *UI) validateInputStrings() {
 	fmt.Println("validations: ", validations)
 
 	if u.inputStringsContainer == nil || len(u.inputStringsContainer.Objects) == 0 {
-		log.Println("No hay círculos para actualizar")
+		log.Println("No hay íconos para actualizar")
 		return
 	}
 
@@ -456,24 +451,29 @@ func (u *UI) validateInputStrings() {
 	}
 
 	for i, card := range u.inputStringsContainer.Objects {
-		cardContainer := card.(*fyne.Container)                 // Obtener el contenedor de la tarjeta
-		content := cardContainer.Objects[1].(*fyne.Container)   // Obtener el contenedor de contenido (etiqueta y círculo)
-		circleContainer := content.Objects[1].(*fyne.Container) // Obtener el contenedor del círculo
-		circleObj := circleContainer.Objects[0]                 // Obtener el objeto CanvasObject del círculo
+		cardContainer := card.(*fyne.Container) // Obtener el contenedor de la tarjeta
 
-		// Verificar si el objeto CanvasObject es un círculo
-		circle, isCircle := circleObj.(*canvas.Circle)
-		if !isCircle {
-			log.Printf("El objeto no es un círculo: %T\n", circleObj)
-			continue
-		}
+		border := cardContainer.Objects[0].(*canvas.Rectangle) // Obtener el objeto borde (rectangle)
 
-		circle.FillColor = color.RGBA{R: 255, G: 0, B: 0, A: 255} // Rojo
+		border.FillColor = color.RGBA{R: 209, G: 93, B: 35, A: 255} // Rojo
 		if validations[i] {
-			circle.FillColor = color.RGBA{R: 0, G: 255, B: 0, A: 255} // Verde
+			border.FillColor = color.RGBA{R: 119, G: 209, B: 35, A: 255} // Verde
 		}
 
-		circle.Refresh()
+		content := cardContainer.Objects[1].(*fyne.Container) // Obtener el contenedor de contenido (etiqueta y contenedor de íconos)
+		iconContainer := content.Objects[1].(*fyne.Container) // Obtener el contenedor del ícono
+
+		// Dependiendo de si la validación es verdadera o falsa, agregar el ícono correspondiente
+		if validations[i] {
+			icon := canvas.NewImageFromResource(theme.ConfirmIcon()) // Ícono de validación
+			iconContainer.Objects = []fyne.CanvasObject{icon}
+		} else {
+			icon := canvas.NewImageFromResource(theme.CancelIcon()) // Ícono de cancelación
+			iconContainer.Objects = []fyne.CanvasObject{icon}
+		}
+
+		border.Refresh()
+		iconContainer.Refresh()
 	}
 }
 
