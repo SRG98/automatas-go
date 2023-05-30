@@ -10,7 +10,7 @@ type Transition struct {
 	Chars []string
 }
 
-func NewTransition(start, end string, chars []string) *Transition {
+func NewTransition(start string, end string, chars []string) *Transition {
 	return &Transition{
 		Start: start,
 		End:   end,

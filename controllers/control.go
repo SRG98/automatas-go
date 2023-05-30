@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/SRG98/automatas-go/logic"
+	logic "github.com/SRG98/automatas-go/logica"
 	"github.com/SRG98/automatas-go/models"
 )
 
@@ -194,14 +194,15 @@ func (c *Controller) AddAutomata(automata *models.Automata) bool {
 }
 
 func (c *Controller) NormalizeAutomata() error {
-	normal := logic.NewDeterminer()
 
 	if c.selectedAutomata == nil {
 		return fmt.Errorf("ningún autómata seleccionado")
 	}
-
+	normal := logic.NewDeterminer()
 	normal.SetAutomata(c.selectedAutomata)
+
 	newAutomata := normal.Determine()
+	newAutomata.SetName("AFD")
 
 	// if err != nil {
 	// 	return nil, fmt.Errorf("error al normalizar el autómata: %v", err)
@@ -215,17 +216,9 @@ func (c *Controller) NormalizeAutomata() error {
 	// fmt.Println("Autómata creado y guardado exitosamente.")
 
 	// FUNCIONALIDAD PELIGROSA
-	fmt.Print(c.selectedAutomata.ToString())
-
-	// Guardar el autómata en el archivo JSON
-	// if c.writeJSONFile(inputJSONFile, newAuto) {
-	// 	fmt.Println("Json guardado")
-	// }
-
-	// if newAutomata == nil {
-	// 	return fmt.Errorf("no se pudo determinar el autómata")
-	// }
-
+	if newAutomata == nil {
+		return fmt.Errorf("no se pudo determinar el autómata")
+	}
 	return nil
 }
 

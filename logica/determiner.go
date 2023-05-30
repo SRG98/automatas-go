@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/SRG98/automatas-go/models"
@@ -27,9 +28,14 @@ func (d *Determiner) SetAutomata(automata *models.Automata) {
 func (d *Determiner) Determine() *models.Automata {
 	states := d.Automata.GetStates()
 	d.setRealAdjacent(states)
-	d.autoTable = d.createTable()
+	for _, state := range states {
+		fmt.Println(state.GetData())
+	}
 
+	d.autoTable = d.createTable()
 	auto := d.formatAutomata(d.autoTable)
+
+	fmt.Print(auto.ToString())
 	return auto
 }
 
@@ -246,11 +252,20 @@ func (d *Determiner) getStatesAtt(statesData []string) (bool, bool) {
 func (d *Determiner) stateIndexByData(stateDataRegistry map[string][]string, destination string) string {
 	for stateIndex, statesData := range stateDataRegistry {
 		if contains(statesData, destination) {
-			return stateIndex
+			return stateIndexstateIndexByData(stateDataRegistry map[string][]string, destination string) string {
+				fo stateIndex, statesData := range stateDataRegistry {
+					f contains(statesData, destination) {
+						return tateIndex
 		}
 	}
 	return ""
-}
+			}}}}
+
+
+
+
+
+
 
 /* ----------------------------------------------------------------------------------------- */
 
