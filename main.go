@@ -8,6 +8,7 @@ import (
 )
 
 func main() {
+	// Return statement without specify variable name
 	controller := controllers.NewController()
 	err := controller.Run()
 	if err != nil {

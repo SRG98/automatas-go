@@ -26,16 +26,15 @@ func (c *Controller) readJSONFile(filename string) (*models.Automata, error) {
 }
 
 func (c *Controller) writeJSONFile(filename string, automata *models.Automata) bool {
-	fileBytes, err := json.MarshalIndent(automata, "", "  ")
-	if err != nil {
-		return false
-	}
+	// fileBytes, err := json.MarshalIndent(automata, "", "  ")
+	// if err != nil {
+	// 	return false
+	// }
 
-	err = os.WriteFile(filename, fileBytes, 0644)
-	if err != nil {
-		return false
-	}
-
+	// err = os.WriteFile(filename, fileBytes, 0644)
+	// if err != nil {
+	// 	return false
+	// }
 	return true
 }
 

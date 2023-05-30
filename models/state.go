@@ -1,14 +1,10 @@
 package models
 
-import (
-	"strings"
-)
-
 type State struct {
 	Data      string
 	IsInitial bool
 	IsFinal   bool
-	Adjacent  []string
+	Adjacent  map[string][]string
 }
 
 func NewState(data string) *State {
@@ -16,7 +12,7 @@ func NewState(data string) *State {
 		Data:      data,
 		IsInitial: false,
 		IsFinal:   false,
-		Adjacent:  []string{},
+		Adjacent:  map[string][]string{},
 	}
 }
 
@@ -38,19 +34,36 @@ func (s *State) GetIsFinal() bool {
 func (s *State) SetIsFinal(final bool) {
 	s.IsFinal = final
 }
-func (s *State) GetAdjacent() []string {
+func (s *State) GetAdjacent() map[string][]string {
 	return s.Adjacent
 }
 
-func (s *State) SetAdjacent(adjacent []string) {
+func (s *State) SetAdjacent(adjacent map[string][]string) {
 	s.Adjacent = adjacent
 }
 
+func (s *State) AddAdjacent(char []string, adjacent string) {
+
+}
+
 func (s *State) ToString() string {
+
+	// brackets := "[ " + strings.Join(s.Adjacent, ", ") + " ]"
+	data := s.Data /*  + " | " + brackets */
+	if s.IsFinal {
+		if s.IsFinal {
+			return "((" + data + "))"
+		}
+	}
+	return "(" + data + ")"
+
+}
+
+/*func (s *State) ToString() string {
 	brackets := "[ " + strings.Join(s.Adjacent, ", ") + " ]"
 	data := s.Data + " | " + brackets
 	if s.IsFinal {
 		return "((" + data + "))"
 	}
 	return "(" + data + ")"
-}
+}*/

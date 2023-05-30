@@ -52,7 +52,13 @@ func automataToGraphviz(automata *models.Automata) (*gographviz.Graph, error) {
 
 	for _, transition := range automata.Transitions {
 		attrs := make(map[string]string)
-		attrs["label"] = "\"" + strings.Join(transition.Chars, ", ") + "\""
+		chars := transition.GetChars()
+		for i, element := range chars {
+			if element == "_" {
+				chars[i] = "ε"
+			}
+		}
+		attrs["label"] = "\"" + strings.Join(chars, ", ") + "\""
 		graph.AddEdge(transition.Start, transition.End, true, attrs)
 	}
 

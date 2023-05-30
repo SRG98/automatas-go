@@ -46,7 +46,7 @@ func (ui *UI) RunUI() error {
 	win := app.NewWindow("Proyecto Automatas")
 
 	// Crear botones
-	buttons := ui.createButtons(win, 6)
+	buttons := ui.createButtons(win, 8)
 
 	// Crear el contenedor de botones (vertical)
 	buttonObjects := make([]fyne.CanvasObject, len(buttons))
@@ -106,6 +106,16 @@ func (ui *UI) createButtons(win fyne.Window, numButtons int) []*widget.Button {
 			text = "Validar  cadenas"
 			onTapped = func() {
 				ui.validateInputStrings()
+			}
+		case 6:
+			text = "Generar autómata"
+			onTapped = func() {
+				ui.generateNewAutomata()
+			}
+		case 7:
+			text = "Normalizar autómata"
+			onTapped = func() {
+				ui.normalize()
 			}
 
 		default:
@@ -475,6 +485,18 @@ func (u *UI) validateInputStrings() {
 	}
 }
 
-func (u *UI) validateCadena() {
+func (u *UI) generateNewAutomata() {
+	u.controller.GenerateAutomata()
+	u.updateImageFunc()
+}
 
+func (u *UI) normalize() {
+	u.controller.GenerateAutomata()
+	err := u.controller.NormalizeAutomata()
+	if err != nil {
+		// dialog.ShowError(err, u.showImageWindow()
+		fmt.Print("Automata nil, check func return")
+		return
+	}
+	u.updateImageFunc()
 }
