@@ -14,3 +14,14 @@ func main() {
 		fmt.Println("Error:", err)
 	}
 }
+
+/*
+func main() {
+	controller := controllers.NewController()
+	uinterface := views.NewUI(controller)
+	err := uinterface.RunUI()
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+}
+*/

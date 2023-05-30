@@ -29,7 +29,6 @@ func (f *Function) SetString(inputString string) {
 func (f *Function) GetInitialState() *State {
 	for _, state := range f.automata.GetStates() {
 		if state.GetIsInitial() {
-			// fmt.Println("intial: ", state.ToString())
 			return state
 		}
 	}
@@ -43,7 +42,6 @@ func (f *Function) hasOneInitialState() bool {
 			initialStates++
 		}
 	}
-	// fmt.Println("Sólo un estado incial? ", initialStates == 1)
 	return initialStates == 1
 }
 
@@ -53,7 +51,6 @@ func (f *Function) hasFinalStates() bool {
 			return true
 		}
 	}
-	// fmt.Println("El autómata debe tener al menos un estado final.")
 	return false
 }
 
@@ -63,14 +60,11 @@ func (f *Function) canTransition(char string) bool {
 	nextState := &State{}
 
 	for _, transition := range transitions {
-		// fmt.Println("actualState:", f.actualState.ToString(), "| trans:", transition.ToString())
 		if f.actualState.GetData() == transition.GetStart() {
 			for _, tChar := range transition.GetChars() {
-				// fmt.Println("to: ", char, "| iterate: ", tChar)
 				if tChar == char {
 					nextState = f.automata.GetState(transition.GetEnd())
 					counter++
-					// fmt.Println("++ | newActualState: ", nextState.ToString())
 				}
 			}
 		}
@@ -93,12 +87,10 @@ func (f *Function) travel() bool {
 	idx := 0
 	for idx < len(f.inputString) {
 		char := string(f.inputString[idx])
-		// fmt.Println("SENDED CHAR:", char)
 		if !f.canTransition(char) {
 			return false
 		}
 		idx++
-		// fmt.Printf("travel index: %v | Char %v can transition.\n", idx, char)
 	}
 	return true
 }
@@ -108,7 +100,6 @@ func (f *Function) Validate(inputString string) bool {
 		return false
 	}
 
-	// fmt.Println("string to use: ", inputString)
 	f.SetString(inputString)
 	f.actualState = f.GetInitialState()
 

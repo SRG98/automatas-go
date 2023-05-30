@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"fyne.io/fyne/app"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
@@ -44,7 +43,7 @@ func (ui *UI) RunUI() error {
 	app.Settings().SetTheme(theme.DefaultTheme())
 
 	// Crear ventana
-	win := app.NewWindow("Go-Automats")
+	win := app.NewWindow("Proyecto Automatas")
 
 	// Crear botones
 	buttons := ui.createButtons(win, 6)
@@ -60,7 +59,7 @@ func (ui *UI) RunUI() error {
 	mainContainer := container.NewHBox(buttonContainer)
 
 	win.SetContent(mainContainer)
-	win.Resize(fyne.NewSize(800, 600))
+	win.Resize(fyne.NewSize(1100, 800))
 
 	// Mostrar la ventana de la imagen
 	ui.updateImageFunc = ui.showImageWindow(app)
@@ -99,15 +98,16 @@ func (ui *UI) createButtons(win fyne.Window, numButtons int) []*widget.Button {
 				ui.showTransitionConfigDialog(win)
 			}
 		case 4:
-			text = "Ingresar texto"
+			text = "Cargar cadenas"
 			onTapped = func() {
 				ui.showFileChooserDialog(win)
 			}
 		case 5:
-			text = "Procesar cadenas"
+			text = "Validar  cadenas"
 			onTapped = func() {
 				ui.validateInputStrings()
 			}
+
 		default:
 			text = fmt.Sprintf("Botón %d", i+1)
 			onTapped = nil
@@ -118,6 +118,37 @@ func (ui *UI) createButtons(win fyne.Window, numButtons int) []*widget.Button {
 	}
 
 	return buttons
+}
+
+func (u *UI) showCreateAutomataDialog(w fyne.Window) {
+
+	dialogContent := container.NewVBox(
+		widget.NewLabel("Crear autómata"),
+	)
+
+	entry := widget.NewEntry()
+	entry.SetPlaceHolder(" ")
+	dialogContent.Add(entry)
+
+	dialog := dialog.NewCustom("Nombre", "", dialogContent, w)
+
+	createButton := widget.NewButton("Crear", func() {
+		automataName := entry.Text
+		if u.controller.CreateAutomata(automataName) {
+			fmt.Println("autómata creado:", automataName)
+
+			dialog.Hide()
+		}
+	})
+
+	cancelButton := widget.NewButton("Cerrar", func() {
+		dialog.Hide()
+	})
+
+	buttons := container.NewHBox(createButton, cancelButton)
+	dialogContent.Add(buttons)
+
+	dialog.Show()
 }
 
 func (u *UI) showImageWindow(app fyne.App) func() {
@@ -136,8 +167,8 @@ func (u *UI) showImageWindow(app fyne.App) func() {
 	image.FillMode = canvas.ImageFillContain
 
 	// Crear una nueva ventana redimensionable
-	imageWindow := app.NewWindow("Imagen")
-	imageWindow.Resize(fyne.NewSize(600, 400))
+	imageWindow := app.NewWindow("Automata")
+	imageWindow.Resize(fyne.NewSize(400, 350))
 
 	// Agregar un ScrollContainer para contener la imagen
 	imageMaxContainer := container.NewMax(image)
@@ -161,7 +192,7 @@ func loadImage(filePath string) *canvas.Image {
 	file, err := os.Open(filePath)
 	if err != nil {
 		log.Printf("No se pudo abrir el archivo: %s\n", filePath)
-		return canvas.NewImageFromResource(theme.FyneLogo())
+		return canvas.NewImageFromResource(theme.CancelIcon())
 	}
 	defer file.Close()
 
@@ -180,39 +211,8 @@ func loadImage(filePath string) *canvas.Image {
 	return image
 }
 
-func (u *UI) showCreateAutomataDialog(w fyne.Window) {
-	dialogContent := container.NewVBox(
-		widget.NewLabel("Crear autómata"),
-	)
-
-	entry := widget.NewEntry()
-	entry.SetPlaceHolder("nombre")
-	dialogContent.Add(entry)
-
-	dialog := dialog.NewCustom("Crear autómata", "", dialogContent, w)
-
-	createButton := widget.NewButton("Aceptar", func() {
-		automataName := entry.Text
-		if u.controller.CreateAutomata(automataName) {
-			fmt.Println("autómata creado:", automataName)
-			u.updateImageFunc()
-			dialog.Hide()
-		}
-	})
-
-	cancelButton := widget.NewButton("Cancelar", func() {
-		dialog.Hide()
-	})
-
-	buttons := container.NewHBox(createButton, cancelButton)
-	dialogContent.Add(buttons)
-
-	dialog.Show()
-}
-
 func (u *UI) showAutomatsListDialog(w fyne.Window) {
-	// Lista de strings de ejemplo
-	// stringList := []string{"Opción 1", "Opción 2", "Opción 3"}
+
 	automatsList := u.controller.GetAutomatsList()
 	stringList := make([]string, len(automatsList))
 
@@ -263,18 +263,18 @@ func (u *UI) showStateConfigDialog(w fyne.Window) {
 	)
 
 	dataEntry := widget.NewEntry()
-	dataEntry.SetPlaceHolder("data")
+	dataEntry.SetPlaceHolder("Estado")
 	dialogContent.Add(dataEntry)
 
-	initialCheckbox := widget.NewCheck("Inicial", nil)
+	initialCheckbox := widget.NewCheck("Estado Inicial", nil)
 	dialogContent.Add(initialCheckbox)
 
-	finalCheckbox := widget.NewCheck("Final", nil)
+	finalCheckbox := widget.NewCheck("Estado Final", nil)
 	dialogContent.Add(finalCheckbox)
 
-	dialog := dialog.NewCustom("Configurar estado", "", dialogContent, w)
+	dialog := dialog.NewCustom("Crear Estado", "", dialogContent, w)
 
-	acceptButton := widget.NewButton("Aceptar", func() {
+	acceptButton := widget.NewButton("Ok", func() {
 		data := dataEntry.Text
 		initial := initialCheckbox.Checked
 		final := finalCheckbox.Checked
@@ -285,7 +285,7 @@ func (u *UI) showStateConfigDialog(w fyne.Window) {
 		}
 	})
 
-	cancelButton := widget.NewButton("Cancelar", func() {
+	cancelButton := widget.NewButton("Cerrar", func() {
 		dialog.Hide()
 	})
 
@@ -296,37 +296,41 @@ func (u *UI) showStateConfigDialog(w fyne.Window) {
 }
 
 func (u *UI) showTransitionConfigDialog(w fyne.Window) {
+	app := app.New()
+	app.Settings().SetTheme(theme.DefaultTheme())
 	dialogContent := container.NewVBox(
 		widget.NewLabel("Configurar transición"),
 	)
 
 	startEntry := widget.NewEntry()
-	startEntry.SetPlaceHolder("inicio")
+	startEntry.SetPlaceHolder("Estado de salida")
 	dialogContent.Add(startEntry)
 
 	endEntry := widget.NewEntry()
-	endEntry.SetPlaceHolder("termino")
+	endEntry.SetPlaceHolder("Estado de llegada")
 	dialogContent.Add(endEntry)
 
 	charsEntry := widget.NewEntry()
-	charsEntry.SetPlaceHolder("caracteres (a,b,...)")
+	charsEntry.SetPlaceHolder("Transicion")
 	dialogContent.Add(charsEntry)
 
-	dialog := dialog.NewCustom("Configurar estado", "", dialogContent, w)
+	dialog := dialog.NewCustom("Crear transicion", "", dialogContent, w)
 
-	acceptButton := widget.NewButton("Aceptar", func() {
+	acceptButton := widget.NewButton("Ok", func() {
 		start := startEntry.Text
 		end := endEntry.Text
 		chars := charsEntry.Text
 		if u.controller.CreateTransition(start, end, chars) {
 			fmt.Printf("Inicio: %s, Termino: %s, Chars: %s\n", start, end, chars)
+			u.updateImageFunc = u.showImageWindow(app)
 			u.updateImageFunc()
+
 			dialog.Hide()
 		}
 
 	})
 
-	cancelButton := widget.NewButton("Cancelar", func() {
+	cancelButton := widget.NewButton("Cerrar", func() {
 		dialog.Hide()
 	})
 
@@ -355,7 +359,7 @@ func (u *UI) showFileChooserDialog(win fyne.Window) {
 
 					// Llamar a displayInputStrings para mostrar las cadenas
 					u.displayInputStrings(win)
-					// u.createStringCards(u.controller.GetInputStrings())
+					u.createStringCards(u.controller.GetInputStrings())
 
 				} else {
 					dialog.ShowInformation("Error", "Solo se permiten archivos .txt", win)
@@ -469,4 +473,8 @@ func (u *UI) validateInputStrings() {
 		border.Refresh()
 		iconContainer.Refresh()
 	}
+}
+
+func (u *UI) validateCadena() {
+
 }

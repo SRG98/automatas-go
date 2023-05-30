@@ -1,0 +1,13 @@
+{
+  "Name": "SRG",
+  "States": [
+    {
+      "Data": "A",
+      "IsInitial": false,
+      "IsFinal": false,
+      "Adjacent": []
+    }
+  ],
+  "Transitions": [],
+  "Alphabet": []
+}

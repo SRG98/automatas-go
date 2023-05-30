@@ -48,6 +48,6 @@ func (c *Controller) readInputFile(filepath string) error {
 	lines := strings.Split(string(fileBytes), "\n")
 	c.inputStrings = lines
 
-	fmt.Print("Texto con ruta predefinida cargado!")
+	fmt.Print("Archivo txt con las cadenas cargado correctamente!")
 	return nil
 }

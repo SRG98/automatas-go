@@ -3,16 +3,17 @@ package controllers
 import (
 	"bufio"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 
 	"github.com/SRG98/automatas-go/models"
 )
 
-const (
-	inputJSONFile    = "data/auto.json"
-	inputTextFile    = "data/input.txt"
-	AbsInputTextFile = "D:/Código/automatas/goiii/data"
+var (
+	inputJSONFile    = "data/automatas.json"
+	inputTextFile    = "data/cadenas.txt"
+	AbsInputTextFile = "C:/Código/automatas/goiii/data"
 	outputImagePath  = "data/graph.png"
 )
 
@@ -43,7 +44,6 @@ func (c *Controller) GetInputStrings() []string {
 }
 
 func (c *Controller) Run() error {
-	//views.RunUI()
 	reader := bufio.NewReader(os.Stdin)
 	for {
 
@@ -88,10 +88,10 @@ func (c *Controller) Run() error {
 			fmt.Println("Ingrese la transicion")
 			fmt.Scanln(&val)
 			c.CreateTransition(sal, lle, val)
-		case 5:
-			c.readInputFile(inputTextFile)
 		case 6:
-			err = c.validateString()
+			c.readInputFile(inputTextFile)
+		case 5:
+			c.validateString()
 		case 7:
 			c.GenerateImage()
 		case 8:
@@ -99,7 +99,7 @@ func (c *Controller) Run() error {
 		case 9:
 			c.viewStrings()
 		case 10:
-			c.ProcessInputStrings()
+			c.validateStringsFromFile(inputTextFile)
 		case 0:
 			return nil
 		default:
@@ -119,17 +119,18 @@ func (c *Controller) showMenu() {
 	fmt.Println("\n-- PROYECTO AUTOMATAS 2023-1 --")
 	fmt.Println("Bienvenido al sistema")
 	fmt.Println("Seleccione la accion que desea realizar : ")
-	fmt.Println("| 1. Ingresar un autómata")
-	fmt.Println("| 2. Cargue un autómata")
-	fmt.Println("| 3. Ingresar un estado")
-	fmt.Println("| 4. Crear transicion")
-	fmt.Println("| 5. Ingresar un texto")
-	fmt.Println("| 6. Valide la cadena")
-	fmt.Println("| 7. Crear imagen del automata")
-	fmt.Println("| 8. Observar el automata")
-	fmt.Println("| 9. Ver las cadenas creadas")
-	fmt.Println("| 10. Procesar cadenas")
-	fmt.Println("| Salir")
+	fmt.Println("Opt                                       ")
+	fmt.Println("(1) Ingresar un autómata")
+	fmt.Println("(2) Cargue un autómata")
+	fmt.Println("(3) Ingresar un estado")
+	fmt.Println("(4) Crear transicion")
+	fmt.Println("(5) Valide la cadena")
+	fmt.Println("(6) Cargar cadenas")
+	fmt.Println("(7) Crear imagen del automata")
+	fmt.Println("(8) Observar el automata")
+	fmt.Println("(9) Ver las cadenas creadas")
+	fmt.Println("(10) Validar cadenas cargas desde txt")
+	fmt.Println("Salir")
 }
 
 func (c *Controller) readOption() (int, error) {
@@ -140,7 +141,7 @@ func (c *Controller) readOption() (int, error) {
 
 func (c *Controller) CreateAutomata(name string) bool {
 	if name == "" {
-		fmt.Println("Nombre vacío")
+		fmt.Println("Campo vacío")
 		return false
 	}
 
@@ -151,14 +152,14 @@ func (c *Controller) CreateAutomata(name string) bool {
 	c.AutomatsList = append(c.AutomatsList, auto)
 	c.selectedAutomata = auto
 
-	fmt.Println("Autómata creado y guardado exitosamente.")
+	fmt.Println("Autómata creado y guardado.")
 
 	// FUNCIONALIDAD PELIGROSA
 	c.SelectAutomata(len(c.AutomatsList) - 1)
 
 	// Guardar el autómata en el archivo JSON
 	if c.writeJSONFile(inputJSONFile, auto) {
-		fmt.Println("Json guardado")
+		fmt.Println("Json guardado correctamente")
 		c.GenerateImage()
 		return true
 
@@ -167,15 +168,14 @@ func (c *Controller) CreateAutomata(name string) bool {
 }
 
 func (c *Controller) SelectAutomata(index int) bool {
-	fmt.Println("POS", index)
 
 	if len(c.AutomatsList) == 0 {
-		fmt.Println("no hay autómatas disponibles")
+		fmt.Println("No se han creado automatas")
 		return false
 	}
 
 	if index == -1 {
-		fmt.Println("Negative Access")
+		fmt.Println("No se puede acceder a esta posicion")
 	}
 
 	if index >= len(c.AutomatsList) {
@@ -185,10 +185,10 @@ func (c *Controller) SelectAutomata(index int) bool {
 
 	c.selectedAutomata = c.AutomatsList[index]
 	if c.function == nil {
-		fmt.Println("No FN")
+		fmt.Println(" ")
 		c.function = models.NewFunction(c.selectedAutomata)
 	} else {
-		fmt.Println("has fn")
+		fmt.Println(" ")
 		c.function.SetAutomata(c.selectedAutomata)
 	}
 
@@ -200,7 +200,7 @@ func (c *Controller) SelectAutomata(index int) bool {
 
 func (c *Controller) CreateState(data string, isInitial bool, isFinal bool) bool {
 	if c.selectedAutomata == nil {
-		fmt.Println("ningún autómata seleccionado")
+		fmt.Println("ningún autómata ha sido seleccionado")
 		return false
 	}
 
@@ -209,8 +209,8 @@ func (c *Controller) CreateState(data string, isInitial bool, isFinal bool) bool
 	}
 
 	if c.selectedAutomata.NewState(data, isInitial, isFinal) {
-		fmt.Println("estado creado exitosamente.")
-		// RETURN FINAL
+		fmt.Println("estado creado correctamente.")
+
 		// Guardar el autómata en el archivo JSON
 		c.GenerateImage()
 		return c.writeJSONFile(inputJSONFile, c.selectedAutomata)
@@ -221,7 +221,7 @@ func (c *Controller) CreateState(data string, isInitial bool, isFinal bool) bool
 
 func (c *Controller) CreateTransition(start string, end string, charsStr string) bool {
 	if start == "" || end == "" || charsStr == "" {
-		fmt.Println("Blank form")
+		fmt.Println("Campo Vacio")
 		return false
 	}
 
@@ -247,11 +247,11 @@ func (c *Controller) CreateTransition(start string, end string, charsStr string)
 
 	if c.selectedAutomata.NewTransition(start, end, chars) {
 		fmt.Print("Nueva transición creada")
-		// Guardar el autómata en el archivo JSON
+
 		c.GenerateImage()
 		return c.writeJSONFile(inputJSONFile, c.selectedAutomata)
 	}
-	return false
+	return true
 }
 
 func (c *Controller) validateString() error {
@@ -285,8 +285,8 @@ func (c *Controller) GenerateImage() error {
 	outputPath := outputImagePath
 
 	err := CreateImage(c.selectedAutomata, outputPath)
-	if err == nil {
-		return fmt.Errorf("error al generar la imagen: %v", err)
+	if err != nil {
+		return fmt.Errorf("Error al generar la imagen: %v", err)
 	}
 
 	fmt.Println("Imagen generada exitosamente en", outputPath)
@@ -295,22 +295,27 @@ func (c *Controller) GenerateImage() error {
 
 func (c *Controller) viewAutomata() error {
 	if c.selectedAutomata == nil {
-		return fmt.Errorf("ningún autómata seleccionado")
+		return fmt.Errorf("Ningún autómata seleccionado")
 	}
 
 	fmt.Println("Información del autómata seleccionado:")
 	fmt.Println("Nombre:", c.selectedAutomata.Name)
-	// fmt.Println("Alfabeto:", strings.Join(c.selectedAutomata.Alphabet, ", "))
+
 	fmt.Println("Estados:")
 
 	for _, state := range c.selectedAutomata.States {
-		fmt.Printf("- %s (inicial: %v, final: %v)\n", state.Data, state.IsInitial, state.IsFinal)
+		fmt.Printf("- %s (Estado de salida: %v, Estado de llegada: %v)\n", state.Data, state.IsInitial, state.IsFinal)
 	}
 
 	fmt.Println("Transiciones:")
 
 	for _, transition := range c.selectedAutomata.Transitions {
-		fmt.Printf("- %s → %s (símbolos: %s)\n", transition.Start, transition.End, strings.Join(transition.Chars, ", "))
+		fmt.Printf("- %s → %s (transicion: %s)\n", transition.Start, transition.End, strings.Join(transition.Chars, ", "))
+	}
+	if len(c.selectedAutomata.Transitions) <= 2 {
+		println("Automata incompleto")
+	} else {
+		println("Automata completo")
 	}
 
 	return nil
@@ -322,16 +327,32 @@ func (c *Controller) viewStrings() error {
 		return fmt.Errorf("no hay cadenas de entrada para mostrar")
 	}
 
-	fmt.Println("Cadenas de entrada:")
+	fmt.Println("Cadenas de Cargadas:")
 	for i, inputString := range c.inputStrings {
 		fmt.Printf("%d. %s\n", i+1, inputString)
 	}
-
 	return nil
 }
 
 func (c *Controller) ProcessInputStrings() ([]bool, error) {
-	list := []bool{false, true, false, true, false}
+
+	if c.selectedAutomata == nil {
+		return nil, fmt.Errorf("Ningun automata seleccionado")
+	}
+	if len(c.inputStrings) == 0 {
+		return nil, fmt.Errorf("No hay cadenas para procesar")
+	}
+	validations := make([]bool, len(c.inputStrings))
+
+	for i, inputString := range c.inputStrings {
+		inputString = strings.TrimSpace(inputString)
+		isValid := c.function.Validate(inputString)
+		validations[i] = isValid
+		print(validations)
+	}
+
+	return validations, nil
+	/*list := []bool{false, true, false, true, false}
 	return list, nil
 
 	validations := []bool{}
@@ -346,14 +367,15 @@ func (c *Controller) ProcessInputStrings() ([]bool, error) {
 	fmt.Println("List: ", c.inputStrings)
 
 	for _, inputString := range c.inputStrings {
+
 		// Procesa y valida la cadena de entrada con el autómata seleccionado
 		inputString = strings.TrimSpace(inputString)
-		// fmt.Println(inputString)
+
 		isValid := c.function.Validate(inputString)
 
 		validations = append(validations, isValid)
 	}
-	return validations, nil
+	return list, nil*/
 }
 
 func clearInputBuffer(reader *bufio.Reader) {
@@ -363,4 +385,35 @@ func clearInputBuffer(reader *bufio.Reader) {
 			break
 		}
 	}
+}
+func (c *Controller) validateStringsFromFile(filepath string) error {
+	if c.selectedAutomata == nil {
+		return fmt.Errorf("ningún autómata seleccionado")
+	}
+
+	// Leer el contenido del archivo
+	content, err := ioutil.ReadFile(filepath)
+	if err != nil {
+		return err
+	}
+
+	// Dividir el contenido en una lista de cadenas
+	inputStrings := strings.Split(string(content), "\n")
+
+	// Validar cada cadena
+	for _, inputStr := range inputStrings {
+		inputStr = strings.TrimSpace(inputStr)
+		if inputStr == "" {
+			continue
+		}
+
+		isValid := c.function.Validate(inputStr)
+		if isValid {
+			fmt.Printf("La cadena \"%s\" es válida.\n", inputStr)
+		} else {
+			fmt.Printf("La cadena \"%s\" es inválida.\n", inputStr)
+		}
+	}
+
+	return nil
 }

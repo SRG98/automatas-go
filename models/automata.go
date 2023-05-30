@@ -141,12 +141,3 @@ func (a *Automata) ToString() string {
 		a.GetName(), a.SeeStates(), a.SeeTransitions(), a.Alphabet,
 	)
 }
-
-// func contains(arr []string, str string) bool {
-// 	for _, a := range arr {
-// 		if a == str {
-// 			return true
-// 		}
-// 	}
-// 	return false
-// }
